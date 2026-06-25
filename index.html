@@ -144,6 +144,61 @@
     </div>
   </div>
 
+  <!-- Business KPIs -->
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-title">ביצועי עסק YTD — ינואר–יוני 2026</div>
+    <div class="panel-sub">מבוסס על נתוני QuickBooks אקטואלים</div>
+    <div class="kpi-row c4" style="margin-bottom:0">
+      <div class="kpi">
+        <div class="kpi-label">Prime Cost YTD</div>
+        <div class="kpi-value" id="biz-prime">—</div>
+        <div class="kpi-sub">COGS% + שכר%</div>
+        <span class="kpi-badge" id="biz-prime-badge">—</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">COGS% YTD</div>
+        <div class="kpi-value" id="biz-cogs">—</div>
+        <div class="kpi-sub">יעד: מתחת ל-38%</div>
+        <span class="kpi-badge" id="biz-cogs-badge">—</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">שכר% YTD</div>
+        <div class="kpi-value" id="biz-labor">—</div>
+        <div class="kpi-sub">כולל ימים מנורמלים</div>
+        <span class="kpi-badge" id="biz-labor-badge">—</span>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">רווח נקי YTD</div>
+        <div class="kpi-value" id="biz-net">—</div>
+        <div class="kpi-sub" id="biz-net-sub">—</div>
+        <span class="kpi-badge" id="biz-net-badge">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-row c4" style="margin-bottom:24px">
+    <div class="kpi">
+      <div class="kpi-label">ממוצע יומי (Snappy)</div>
+      <div class="kpi-value" id="biz-daily">—</div>
+      <div class="kpi-sub">ימי פתיחה בלבד</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">החודש הרווחי ביותר</div>
+      <div class="kpi-value" id="biz-bestnet">—</div>
+      <div class="kpi-sub" id="biz-bestnet-sub">—</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">שבוע פסח</div>
+      <div class="kpi-value">−90%</div>
+      <div class="kpi-sub">$2,497 בלבד · 5–11 אפריל</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">קצב שנתי (Pace)</div>
+      <div class="kpi-value" id="biz-pace">—</div>
+      <div class="kpi-sub">בהתבסס על ממוצע חודשי</div>
+    </div>
+  </div>
+
   <div class="kpi-row c3">
     <div class="kpi">
       <div class="kpi-label">Clover / קופה פנים</div>
@@ -383,6 +438,48 @@ $('kpi-best').textContent = moneyK(bestMonth.sales);
 $('kpi-best-sub').textContent = bestMonth.m+' 2026';
 $('kpi-mtd').textContent = moneyK(lastMonth.sales);
 $('kpi-mtd-sub').textContent = lastMonth.note;
+
+// Business KPIs (historical months only — exclude June MTD for margins)
+const histFull = mData.filter(m=>m.cogs!=null && m.labor!=null);
+const bizS = histFull.reduce((s,m)=>s+m.sales,0);
+const bizC = histFull.reduce((s,m)=>s+m.cogs,0);
+const bizL = histFull.reduce((s,m)=>s+(m.laborNorm||m.labor),0); // normalized
+const bizN = histFull.reduce((s,m)=>s+m.net,0);
+const bizPrime = (bizC+bizL)/bizS*100;
+const bizCogsP = bizC/bizS*100;
+const bizLaborP = bizL/bizS*100;
+const bizMargin = bizN/bizS*100;
+
+$('biz-prime').textContent = pct(bizPrime);
+$('biz-prime-badge').textContent = bizPrime<65?'✓ טוב':bizPrime<75?'⚠ גבוה':'⛔ גבוה מאוד';
+$('biz-prime-badge').className = 'kpi-badge '+(bizPrime<65?'badge-up':bizPrime<75?'badge-neutral':'badge-down');
+
+$('biz-cogs').textContent = pct(bizCogsP);
+$('biz-cogs-badge').textContent = bizCogsP<38?'✓ ביעד':'⚠ מעל יעד';
+$('biz-cogs-badge').className = 'kpi-badge '+(bizCogsP<38?'badge-up':'badge-neutral');
+
+$('biz-labor').textContent = pct(bizLaborP);
+$('biz-labor-badge').textContent = '* מנורמל 4 שבועות';
+$('biz-labor-badge').className = 'kpi-badge badge-neutral';
+
+$('biz-net').textContent = money(bizN);
+$('biz-net-sub').textContent = pct(Math.abs(bizMargin))+' margin'+(bizN<0?' (הפסד)':'');
+$('biz-net-badge').textContent = bizN>=0?'✓ רווח':'⚠ הפסד';
+$('biz-net-badge').className = 'kpi-badge '+(bizN>=0?'badge-up':'badge-down');
+
+// Daily average from Snappy
+const snDays = SNAPPY_DAILY.filter(d=>d.sales>0);
+const snAvg = snDays.length ? Math.round(snDays.reduce((s,d)=>s+d.sales,0)/snDays.length) : null;
+$('biz-daily').textContent = snAvg ? money(snAvg) : moneyK(histFull.reduce((s,m)=>s+m.sales,0)/histFull.length/25);
+
+// Best net month
+const bestNet = [...histFull].sort((a,b)=>b.net-a.net)[0];
+$('biz-bestnet').textContent = money(bestNet.net);
+$('biz-bestnet-sub').textContent = bestNet.m+' · '+pct(bestNet.net/bestNet.sales*100)+' margin';
+
+// Annual pace
+const monthsElapsed = mData.length;
+$('biz-pace').textContent = moneyK(ytdSales/monthsElapsed*12);
 
 $('ov-cl-pct').textContent  = pct(totCl/totAll*100);
 $('ov-cl-amt').textContent  = money(totCl)+' סה"כ';
