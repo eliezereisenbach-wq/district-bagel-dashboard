@@ -124,8 +124,8 @@
 
   <!-- Business KPIs -->
   <div class="panel">
-    <div class="panel-title">Business Performance — Jan–Jun 2026</div>
-    <div class="panel-sub">Based on QuickBooks actuals · labor normalized to 4-week months</div>
+    <div class="panel-title">Business Performance — Jan–Apr 2026 (closed months)</div>
+    <div class="panel-sub">Official QuickBooks report · net profit includes all fixed expenses</div>
     <div class="kpi-row c4" style="margin-bottom:16px">
       <div class="kpi">
         <div class="kpi-label">Prime Cost (YTD)</div>
@@ -142,7 +142,7 @@
       <div class="kpi">
         <div class="kpi-label">Labor % (YTD)</div>
         <div class="kpi-value" id="biz-labor">—</div>
-        <div class="kpi-sub">Normalized 4-week</div>
+        <div class="kpi-sub">Actual payroll</div>
         <span class="kpi-badge" id="biz-labor-badge">—</span>
       </div>
       <div class="kpi">
@@ -297,12 +297,12 @@
   <div class="grid2">
     <div class="panel" style="margin-bottom:0">
       <div class="panel-title">Monthly P&amp;L — Jan–Jun 2026</div>
-      <div class="panel-sub">Stacked costs + sales line</div>
+      <div class="panel-sub">Stacked costs (incl. overhead) + sales line</div>
       <canvas id="plChart" style="max-height:280px"></canvas>
     </div>
     <div class="panel" style="margin-bottom:0">
       <div class="panel-title">Prime Cost by Month</div>
-      <div class="panel-sub">COGS% + Labor% · * = normalized 4-week</div>
+      <div class="panel-sub">COGS% + Labor% · actual payroll</div>
       <div class="pills" id="gaugePills"></div>
       <div class="gauge-wrap">
         <svg width="160" height="90" viewBox="0 0 160 90">
@@ -335,6 +335,7 @@
             <th class="num">Labor</th>
             <th class="num">Labor%</th>
             <th class="num">Prime</th>
+            <th class="num">Overhead</th>
             <th class="num">Net Profit</th>
             <th>Note</th>
           </tr>
@@ -354,13 +355,17 @@
 
 /*SNAPPY_DAILY_START*/const SNAPPY_DAILY=[];const SNAPPY_UPDATED=null;/*SNAPPY_DAILY_END*/
 
+// Figures from the official QuickBooks management report (Parc 2026).
+// net is the REAL bottom line from that report (its Net profit %); it already
+// includes all fixed expenses. "overhead" = those fixed costs not itemized
+// here (rent, utilities, insurance, fees, etc.) = sales - cogs - labor - admin - net.
 const mData = [
-  {m:'January',  sales:89583,  cogs:35245, labor:46718, admin:11076, net:-16092, cogsP:39.3, laborP:52.2, primeP:91.5, laborNorm:37374, laborNormP:41.7, primeNormP:81.0, note:'5-week payroll month'},
-  {m:'February', sales:95247,  cogs:39050, labor:30313, admin:11076, net:1091,   cogsP:41.0, laborP:31.8, primeP:72.8, note:'QB actuals ✓'},
-  {m:'March',    sales:125975, cogs:46501, labor:32127, admin:11076, net:20733,  cogsP:36.9, laborP:25.5, primeP:62.4, note:'High COGS — pre-Passover inventory'},
-  {m:'April',    sales:83246,  cogs:30079, labor:20439, admin:8000,  net:24728,  cogsP:36.1, laborP:24.6, primeP:60.7, note:'Passover disruption'},
-  {m:'May',      sales:94119,  cogs:26122, labor:38789, admin:10632, net:5552,   cogsP:27.8, laborP:41.2, primeP:69.0, laborNorm:31031, laborNormP:33.0, primeNormP:60.8, note:'5-week payroll month'},
-  {m:'June',     sales:/*JUNE_MTD_START*/86078/*JUNE_MTD_END*/, cogs:null, labor:null, admin:null, net:null, cogsP:null, laborP:null, primeP:null, note:'In progress (MTD)'},
+  {m:'January',  sales:89583,  cogs:25236, labor:33089, admin:10000, overhead:24277, net:-3019,  cogsP:28.2, laborP:36.9, primeP:65.1, netP:-3.37, note:'5-week payroll · loss'},
+  {m:'February', sales:95247,  cogs:37096, labor:22575, admin:8000,  overhead:22766, net:4810,   cogsP:38.9, laborP:23.7, primeP:62.6, netP:5.05,  note:'QB report ✓'},
+  {m:'March',    sales:125975, cogs:49013, labor:22389, admin:8000,  overhead:27866, net:18707,  cogsP:38.9, laborP:17.8, primeP:56.7, netP:14.85, note:'Pre-Passover inventory build'},
+  {m:'April',    sales:83246,  cogs:30079, labor:20439, admin:8000,  overhead:14888, net:9840,   cogsP:36.1, laborP:24.6, primeP:60.7, netP:11.82, note:'Passover disruption'},
+  {m:'May',      sales:94119,  cogs:26122, labor:30117, admin:10000, overhead:null,  net:null,   cogsP:27.8, laborP:32.0, primeP:59.8, netP:null,  note:'Preliminary — books not closed'},
+  {m:'June',     sales:/*JUNE_MTD_START*/86078/*JUNE_MTD_END*/, cogs:null, labor:null, admin:null, overhead:null, net:null, cogsP:null, laborP:null, primeP:null, netP:null, note:'In progress (MTD)'},
 ];
 
 const byM = {
@@ -448,7 +453,8 @@ function showTab(id, btn) {
 // COMPUTE TOTALS
 // ══════════════════════════════════════════════════════
 const ytdSales = mData.reduce((s,m)=>s+(m.sales||0),0);
-const histFull = mData.filter(m=>m.cogs!=null);
+// Closed months = those with a final net profit (Jan–Apr). May/Jun not yet closed.
+const histFull = mData.filter(m=>m.net!=null);
 const bestMonth= [...mData].sort((a,b)=>b.sales-a.sales)[0];
 const avgSales = Math.round(mData.slice(0,-1).reduce((s,m)=>s+m.sales,0)/(mData.length-1));
 const lastMonth= mData[mData.length-1];
@@ -459,7 +465,7 @@ const totAll=totCl+totCng+totUb;
 
 const bizS=histFull.reduce((s,m)=>s+m.sales,0);
 const bizC=histFull.reduce((s,m)=>s+m.cogs,0);
-const bizL=histFull.reduce((s,m)=>s+(m.laborNorm||m.labor),0);
+const bizL=histFull.reduce((s,m)=>s+m.labor,0);
 const bizN=histFull.reduce((s,m)=>s+m.net,0);
 
 if(SNAPPY_UPDATED){
@@ -486,10 +492,10 @@ $('biz-cogs').textContent=pct(bizCogsP);
 $('biz-cogs-badge').textContent=bizCogsP<38?'✓ On target':'⚠ Above target';
 $('biz-cogs-badge').className='kpi-badge '+(bizCogsP<38?'badge-up':'badge-neutral');
 $('biz-labor').textContent=pct(bizLaborP);
-$('biz-labor-badge').textContent='* normalized';
-$('biz-labor-badge').className='kpi-badge badge-neutral';
+$('biz-labor-badge').textContent=bizLaborP<30?'✓ Healthy':'⚠ High';
+$('biz-labor-badge').className='kpi-badge '+(bizLaborP<30?'badge-up':'badge-neutral');
 $('biz-net').textContent=money(bizN);
-$('biz-net-sub').textContent=pct(Math.abs(bizN/bizS*100))+' margin'+(bizN<0?' (loss)':'');
+$('biz-net-sub').textContent=pct(Math.abs(bizN/bizS*100))+' margin'+(bizN<0?' (net loss)':'');
 $('biz-net-badge').textContent=bizN>=0?'✓ Profit':'⚠ Loss';
 $('biz-net-badge').className='kpi-badge '+(bizN>=0?'badge-up':'badge-down');
 
@@ -589,8 +595,9 @@ new Chart($('plChart').getContext('2d'),{
   type:'bar',
   data:{labels:mData.map(m=>m.m.slice(0,3)),datasets:[
     {label:'COGS',  data:mData.map(m=>m.cogs), backgroundColor:'#fbbf2480',borderColor:'#f59e0b',borderWidth:1,stack:'s'},
-    {label:'Labor', data:mData.map(m=>m.laborNorm||m.labor),backgroundColor:'#f8717180',borderColor:'#ef4444',borderWidth:1,stack:'s'},
+    {label:'Labor', data:mData.map(m=>m.labor),backgroundColor:'#f8717180',borderColor:'#ef4444',borderWidth:1,stack:'s'},
     {label:'Admin', data:mData.map(m=>m.admin), backgroundColor:'#c084fc80',borderColor:'#a855f7',borderWidth:1,stack:'s'},
+    {label:'Overhead', data:mData.map(m=>m.overhead), backgroundColor:'#94a3b880',borderColor:'#64748b',borderWidth:1,stack:'s'},
     {label:'Sales', data:mData.map(m=>m.sales),type:'line',borderColor:'#2563eb',backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#2563eb',tension:0.3},
   ]},
   options:{plugins:{legend:{labels:{font:{family:'Inter',size:12},usePointStyle:true,padding:12}},tooltip:{mode:'index'}},
@@ -612,20 +619,21 @@ const pillsEl=$('gaugePills');
 function showGauge(lbl){
   let d;
   if(lbl==='Q1'){
-    const q=histFull.slice(0,3),qs=q.reduce((s,m)=>s+m.sales,0),qc=q.reduce((s,m)=>s+m.cogs,0),ql=q.reduce((s,m)=>s+(m.laborNorm||m.labor),0);
-    d={cogsP:qc/qs*100,laborP:ql/qs*100,primeP:(qc+ql)/qs*100,admin:11076*3/qs*100,note:'Q1 Average (Jan–Mar)'};
+    const q=histFull.slice(0,3),qs=q.reduce((s,m)=>s+m.sales,0),qc=q.reduce((s,m)=>s+m.cogs,0),ql=q.reduce((s,m)=>s+m.labor,0),qa=q.reduce((s,m)=>s+m.admin,0);
+    d={cogsP:qc/qs*100,laborP:ql/qs*100,primeP:(qc+ql)/qs*100,adminP:qa/qs*100,note:'Q1 Average (Jan–Mar)'};
   } else if(lbl==='All'){
-    d={cogsP:bizCogsP,laborP:bizLaborP,primeP:(bizC+bizL)/bizS*100,admin:histFull.reduce((s,m)=>s+m.admin,0)/bizS*100,note:'YTD Average (normalized)'};
+    const qa=histFull.reduce((s,m)=>s+m.admin,0);
+    d={cogsP:bizCogsP,laborP:bizLaborP,primeP:(bizC+bizL)/bizS*100,adminP:qa/bizS*100,note:'YTD Average (Jan–Apr)'};
   } else {
     const m=histFull.find(m=>m.m===lbl); if(!m)return;
-    d={...m,admin:m.admin,cogsP:m.cogsP,laborP:m.laborNormP||m.laborP,primeP:m.primeNormP||m.primeP};
+    d={cogsP:m.cogsP,laborP:m.laborP,primeP:m.primeP,adminP:m.admin/m.sales*100,note:m.note};
   }
   const prime=d.primeP;
   $('gVal').textContent=pct(prime);
-  $('gSub').textContent=lbl+(d.laborNormP?' (normalized)':'');
+  $('gSub').textContent=lbl;
   $('gFood').textContent=pct(d.cogsP);
-  $('gLabor').textContent=pct(d.laborP)+(d.laborNormP?' *':'');
-  $('gAdmin').textContent=d.admin?pct(typeof d.admin==='number'&&d.admin<2?d.admin*100:d.admin):'—';
+  $('gLabor').textContent=pct(d.laborP);
+  $('gAdmin').textContent=pct(d.adminP);
   $('gNote').textContent=d.note||'';
   $('gArc').setAttribute('stroke-dashoffset',188.5*(1-Math.min(prime/100,1)));
   $('gArc').setAttribute('stroke',prime<65?'#16a34a':prime<75?'#f59e0b':'#ef4444');
@@ -634,27 +642,33 @@ showGauge('January');
 
 // P&L table
 const plT=$('plTbody');
-let ytdS=0,ytdC=0,ytdL=0,ytdN=0;
 mData.forEach(m=>{
-  ytdS+=m.sales;if(m.cogs)ytdC+=m.cogs;if(m.labor)ytdL+=m.labor;if(m.net)ytdN+=m.net;
   const nc=m.net==null?'':m.net>=0?'color:#16a34a;font-weight:600':'color:#dc2626;font-weight:600';
+  const netCell=m.net==null?'—':money(m.net)+(m.netP!=null?' · '+pct(m.netP):'');
   plT.innerHTML+=`<tr>
     <td><strong>${m.m}</strong></td>
     <td class="num">${money(m.sales)}</td>
     <td class="num">${m.cogs?money(m.cogs):'—'}</td>
     <td class="num">${pct(m.cogsP)}</td>
-    <td class="num">${m.labor?money(m.laborNorm||m.labor):'—'}</td>
-    <td class="num">${m.laborNormP?pct(m.laborNormP)+' *':pct(m.laborP)}</td>
-    <td class="num">${m.primeNormP?pct(m.primeNormP)+' *':pct(m.primeP)}</td>
-    <td class="num" style="${nc}">${money(m.net)}</td>
+    <td class="num">${m.labor?money(m.labor):'—'}</td>
+    <td class="num">${pct(m.laborP)}</td>
+    <td class="num">${pct(m.primeP)}</td>
+    <td class="num">${m.overhead!=null?money(m.overhead):'—'}</td>
+    <td class="num" style="${nc}">${netCell}</td>
     <td style="font-size:11px;color:#94a3b8">${m.note}</td>
   </tr>`;
 });
+// YTD totals over closed months only (Jan–Apr)
+const cl=histFull;
+const ytdS=cl.reduce((s,m)=>s+m.sales,0), ytdC=cl.reduce((s,m)=>s+m.cogs,0),
+      ytdL=cl.reduce((s,m)=>s+m.labor,0), ytdO=cl.reduce((s,m)=>s+m.overhead,0),
+      ytdN=cl.reduce((s,m)=>s+m.net,0);
 plT.innerHTML+=`<tr style="background:#f8fafc;font-weight:700">
-  <td>YTD Total</td><td class="num">${money(ytdS)}</td><td class="num">${money(ytdC)}</td>
+  <td>YTD (Jan–Apr)</td><td class="num">${money(ytdS)}</td><td class="num">${money(ytdC)}</td>
   <td class="num">${pct(ytdC/ytdS*100)}</td><td class="num">${money(ytdL)}</td>
   <td class="num">${pct(ytdL/ytdS*100)}</td><td class="num">${pct((ytdC+ytdL)/ytdS*100)}</td>
-  <td class="num" style="${ytdN>=0?'color:#16a34a':'color:#dc2626'}">${money(ytdN)}</td><td></td>
+  <td class="num">${money(ytdO)}</td>
+  <td class="num" style="${ytdN>=0?'color:#16a34a':'color:#dc2626'}">${money(ytdN)} · ${pct(ytdN/ytdS*100)}</td><td></td>
 </tr>`;
 </script>
 </body>
