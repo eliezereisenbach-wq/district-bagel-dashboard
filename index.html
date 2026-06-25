@@ -176,6 +176,29 @@
     </div>
   </div>
 
+  <!-- Labor Hours (Connecteam) -->
+  <div class="panel">
+    <div class="panel-title">Labor Hours — Connecteam Time Clock</div>
+    <div class="panel-sub">Total paid hours per week · updated every Sunday</div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="kpi purple" style="margin-bottom:0">
+          <div class="kpi-label">This Week — Paid Hours</div>
+          <div class="kpi-value" id="lab-hours">—</div>
+          <div class="kpi-sub" id="lab-week">—</div>
+        </div>
+        <div class="kpi teal" style="margin-bottom:0">
+          <div class="kpi-label">Avg Hours / Employee</div>
+          <div class="kpi-value" id="lab-avg">—</div>
+          <div class="kpi-sub" id="lab-emp">—</div>
+        </div>
+      </div>
+      <div>
+        <canvas id="laborChart" style="max-height:200px"></canvas>
+      </div>
+    </div>
+  </div>
+
   <div class="grid2">
     <div class="panel" style="margin-bottom:0">
       <div class="panel-title">Monthly Sales 2026</div>
@@ -374,6 +397,15 @@ const weeks = [
   {week:"May 31–Jun 6",cl:10785,cng:9618,  ub:5232,  total:25636},
 ];
 
+// Labor hours from Connecteam Time Clock — updated weekly (each Sunday).
+// hours = total paid hours for the week (decimal). Newest week last.
+/*LABOR_WEEKS_START*/
+const laborWeeks = [
+  {week:"Jun 21–27", hours:226.32, employees:9},
+  {week:"Jun 21-27", hours:226.32, employees:9},
+];
+/*LABOR_WEEKS_END*/
+
 // ══════════════════════════════════════════════════════
 // HELPERS
 // ══════════════════════════════════════════════════════
@@ -449,6 +481,26 @@ $('biz-pace').textContent=moneyK(ytdSales/mData.length*12);
 $('ov-cl-pct').textContent=pct(totCl/totAll*100);   $('ov-cl-amt').textContent=money(totCl)+' total';
 $('ov-cng-pct').textContent=pct(totCng/totAll*100); $('ov-cng-amt').textContent=money(totCng)+' total';
 $('ov-ub-pct').textContent=pct(totUb/totAll*100);   $('ov-ub-amt').textContent=money(totUb)+' total';
+
+// Labor hours (Connecteam)
+const hhmm = h => Math.floor(h)+'h '+String(Math.round((h-Math.floor(h))*60)).padStart(2,'0')+'m';
+if(laborWeeks.length){
+  const lw=laborWeeks[laborWeeks.length-1];
+  $('lab-hours').textContent=hhmm(lw.hours);
+  $('lab-week').textContent=lw.week+' · '+lw.employees+' employees';
+  $('lab-avg').textContent=hhmm(lw.hours/lw.employees);
+  $('lab-emp').textContent='Across '+lw.employees+' staff';
+  new Chart($('laborChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:laborWeeks.map(w=>w.week),datasets:[{
+      label:'Paid hours',data:laborWeeks.map(w=>w.hours),
+      backgroundColor:'#7c3aed',borderRadius:6,borderSkipped:false
+    }]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>hhmm(c.raw)+' total'}}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'Inter',size:11}}},
+              y:{grid:{color:'#f1f5f9'},ticks:{font:{family:'Inter',size:11},callback:v=>v+'h'}}}}
+  });
+}
 
 // Monthly bar chart
 new Chart($('monthlySalesChart').getContext('2d'),{
