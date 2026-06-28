@@ -99,7 +99,7 @@
 <!-- ══════════════════════════ OVERVIEW ══════════════════════════ -->
 <div class="page active" id="page-overview">
 
-  <div class="kpi-row c4">
+  <div class="kpi-row c5">
     <div class="kpi blue">
       <div class="kpi-label">YTD Sales</div>
       <div class="kpi-value" id="kpi-ytd">—</div>
@@ -119,6 +119,11 @@
       <div class="kpi-label">June MTD</div>
       <div class="kpi-value" id="kpi-mtd">—</div>
       <div class="kpi-sub" id="kpi-mtd-sub">—</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-label">Gift Cards (YTD)</div>
+      <div class="kpi-value" id="kpi-gift">—</div>
+      <div class="kpi-sub" id="kpi-gift-sub">—</div>
     </div>
   </div>
 
@@ -501,6 +506,10 @@ $('kpi-best').textContent    = moneyK(bestMonth.sales);
 $('kpi-best-sub').textContent= bestMonth.m+' 2026';
 $('kpi-mtd').textContent     = moneyK(lastMonth.sales);
 $('kpi-mtd-sub').textContent = lastMonth.note;
+// Gift cards paid (F4 Gift tender) — from Clover, YTD 2026
+const giftCardYTD=23527, giftCardTxns=1428;
+$('kpi-gift').textContent    = money(giftCardYTD);
+$('kpi-gift-sub').textContent= giftCardTxns.toLocaleString()+' payments · paid via gift card';
 
 // Business KPIs
 const bizPrime=((bizC+bizL)/bizS*100), bizCogsP=(bizC/bizS*100), bizLaborP=(bizL/bizS*100);
