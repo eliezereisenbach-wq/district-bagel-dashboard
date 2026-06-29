@@ -116,14 +116,14 @@
       <div class="kpi-sub" id="kpi-best-sub">—</div>
     </div>
     <div class="kpi orange">
-      <div class="kpi-label">June MTD</div>
-      <div class="kpi-value" id="kpi-mtd">—</div>
-      <div class="kpi-sub" id="kpi-mtd-sub">—</div>
+      <div class="kpi-label">Week vs Last Week</div>
+      <div class="kpi-value" id="kpi-week-vs">—</div>
+      <div class="kpi-sub" id="kpi-week-vs-sub">—</div>
     </div>
     <div class="kpi purple">
-      <div class="kpi-label">Gift Cards (YTD)</div>
-      <div class="kpi-value" id="kpi-gift">—</div>
-      <div class="kpi-sub" id="kpi-gift-sub">—</div>
+      <div class="kpi-label">Labor Efficiency</div>
+      <div class="kpi-value" id="kpi-labor-eff">—</div>
+      <div class="kpi-sub">$/labor hour</div>
     </div>
   </div>
 
@@ -506,8 +506,25 @@ $('kpi-ytd').textContent     = moneyK(ytdSales);
 $('kpi-avg').textContent     = moneyK(avgSales);
 $('kpi-best').textContent    = moneyK(bestMonth.sales);
 $('kpi-best-sub').textContent= bestMonth.m+' 2026';
-$('kpi-mtd').textContent     = moneyK(lastMonth.sales);
-$('kpi-mtd-sub').textContent = lastMonth.note;
+
+// Week vs Last Week
+const allRegularWeeks = weeks.filter(w => !w.passover && !w.partial);
+if(allRegularWeeks.length >= 2){
+  const currW = allRegularWeeks[allRegularWeeks.length-1];
+  const prevW = allRegularWeeks[allRegularWeeks.length-2];
+  const weekChange = Math.round((currW.total - prevW.total) / prevW.total * 100);
+  $('kpi-week-vs').textContent = (weekChange >= 0 ? '+' : '') + weekChange + '%';
+  $('kpi-week-vs').style.color = weekChange >= 0 ? '#10b981' : '#ef4444';
+  $('kpi-week-vs-sub').textContent = currW.week + ' vs ' + prevW.week;
+}
+
+// Labor Efficiency (sales per labor hour in June)
+const juneL = mData.find(m => m.m === 'June');
+const juneHours = laborWeeks.filter(w => w.week.includes('Jun')).reduce((s, w) => s + (w.hours || 0), 0);
+if(juneL && juneL.sales && juneHours > 0){
+  const efficiency = Math.round(juneL.sales / juneHours);
+  $('kpi-labor-eff').textContent = '$' + efficiency;
+}
 // Gift cards paid (F4 Gift tender) — from Clover, YTD 2026
 const giftCardYTD=23527, giftCardTxns=1428;
 $('kpi-gift').textContent    = money(giftCardYTD);
