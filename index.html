@@ -247,6 +247,11 @@
       <span class="kpi-badge badge-up">↑ Growing</span>
     </div>
     <div class="kpi">
+      <div class="kpi-label">Snappy / POS</div>
+      <div class="kpi-value" id="ov-sn-pct">—</div>
+      <div class="kpi-sub" id="ov-sn-amt">—</div>
+    </div>
+    <div class="kpi">
       <div class="kpi-label">Uber Eats / Delivery</div>
       <div class="kpi-value" id="ov-ub-pct">—</div>
       <div class="kpi-sub" id="ov-ub-amt">—</div>
@@ -541,6 +546,7 @@ $('biz-pace').textContent=moneyK(ytdSales/mData.length*12);
 // Channel cards
 $('ov-cl-pct').textContent=pct(totCl/totAll*100);   $('ov-cl-amt').textContent=money(totCl)+' total';
 $('ov-cng-pct').textContent=pct(totCng/totAll*100); $('ov-cng-amt').textContent=money(totCng)+' total';
+$('ov-sn-pct').textContent=pct(totSn/totAll*100);   $('ov-sn-amt').textContent=money(totSn)+' total';
 $('ov-ub-pct').textContent=pct(totUb/totAll*100);   $('ov-ub-amt').textContent=money(totUb)+' total';
 
 // Labor hours (Connecteam)
