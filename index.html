@@ -480,7 +480,7 @@ const ytdSales = mData.reduce((s,m)=>s+(m.sales||0),0);
 // Closed months = those with a final net profit (Jan–Apr). May/Jun not yet closed.
 const histFull = mData.filter(m=>m.net!=null);
 const bestMonth= [...mData].sort((a,b)=>b.sales-a.sales)[0];
-const avgSales = Math.round(mData.slice(0,-1).reduce((s,m)=>s+m.sales,0)/(mData.length-1));
+const avgSales = Math.round(mData.reduce((s,m)=>s+(m.sales||0),0)/mData.length);
 const lastMonth= mData[mData.length-1];
 
 let totCl=0,totCng=0,totUb=0;
