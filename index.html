@@ -127,33 +127,6 @@
     </div>
   </div>
 
-  <div class="kpi-row c5" style="margin-top:12px">
-    <div class="kpi" style="--color:#ec4899">
-      <div class="kpi-label">Week vs Last Week</div>
-      <div class="kpi-value" id="kpi-week-vs">—</div>
-      <div class="kpi-sub" id="kpi-week-vs-sub">—</div>
-    </div>
-    <div class="kpi" style="--color:#6366f1">
-      <div class="kpi-label">Labor Efficiency</div>
-      <div class="kpi-value" id="kpi-labor-eff">—</div>
-      <div class="kpi-sub" id="kpi-labor-eff-sub">—</div>
-    </div>
-    <div class="kpi" style="--color:#f59e0b">
-      <div class="kpi-label">Best Channel</div>
-      <div class="kpi-value" id="kpi-best-ch">—</div>
-      <div class="kpi-sub" id="kpi-best-ch-sub">—</div>
-    </div>
-    <div class="kpi" style="--color:#10b981">
-      <div class="kpi-label">Projected Month-End</div>
-      <div class="kpi-value" id="kpi-proj-month">—</div>
-      <div class="kpi-sub" id="kpi-proj-month-sub">—</div>
-    </div>
-    <div class="kpi" style="--color:#3b82f6">
-      <div class="kpi-label">Payroll % (Jun)</div>
-      <div class="kpi-value" id="kpi-payroll-pct">—</div>
-      <div class="kpi-sub">of Jun sales</div>
-    </div>
-  </div>
 
   <!-- Business KPIs -->
   <div class="panel">
@@ -520,26 +493,6 @@ const bizC=histFull.reduce((s,m)=>s+m.cogs,0);
 const bizL=histFull.reduce((s,m)=>s+m.labor,0);
 const bizN=histFull.reduce((s,m)=>s+m.net,0);
 
-// New KPI calculations (temporarily disabled - debugging)
-const regularWeeks=weeks.filter(w=>!w.passover&&!w.partial)||[];
-const currWeek=regularWeeks.length>0?regularWeeks[regularWeeks.length-1]:null;
-const prevWeek=regularWeeks.length>1?regularWeeks[regularWeeks.length-2]:null;
-const weekVsWeek=currWeek&&prevWeek?Math.round((currWeek.total-prevWeek.total)/prevWeek.total*100):0;
-
-const juneData=mData.find(m=>m.m==='June')||{};
-const juneLaborHours=laborWeeks.filter(w=>w.week&&w.week.includes('Jun')).reduce((s,w)=>s+(w.hours||0),0)||0;
-const laborEff=juneData.sales&&juneLaborHours>0?Math.round(juneData.sales/juneLaborHours):0;
-
-const snappyTotal=weeks.reduce((s,w)=>s+(w.sn||0),0)||0;
-const channelTotals={Clover:totCl||0,Snappy:snappyTotal,Curbngo:totCng||0,Uber:totUb||0};
-const bestChannel=Object.entries(channelTotals).sort((a,b)=>b[1]-a[1])[0]||['—',0];
-
-const today=new Date();
-const daysInJune=30;
-const daysElapsed=Math.min(today.getDate(),daysInJune);
-const projectedMonth=juneData.sales?Math.round(juneData.sales/Math.max(daysElapsed,1)*daysInJune):0;
-
-const junePayrollPct=juneData.sales&&juneData.labor?Math.round(juneData.labor/juneData.sales*100):0;
 
 if(SNAPPY_UPDATED){
   const d=new Date(SNAPPY_UPDATED);
@@ -560,21 +513,6 @@ const giftCardYTD=23527, giftCardTxns=1428;
 $('kpi-gift').textContent    = money(giftCardYTD);
 $('kpi-gift-sub').textContent= giftCardTxns.toLocaleString()+' payments · paid via gift card';
 
-// New KPIs
-$('kpi-week-vs').textContent = (weekVsWeek>=0?'+':'')+weekVsWeek+'%';
-$('kpi-week-vs').style.color = weekVsWeek>=0?'#10b981':'#ef4444';
-$('kpi-week-vs-sub').textContent = currWeek?currWeek.week+' vs '+prevWeek.week:'—';
-
-$('kpi-labor-eff').textContent = '$'+laborEff;
-$('kpi-labor-eff-sub').textContent = laborEff?'sales per labor hour':'no hours data';
-
-$('kpi-best-ch').textContent = bestChannel[0];
-$('kpi-best-ch-sub').textContent = money(bestChannel[1])+' · '+Math.round(bestChannel[1]/totAll*100)+'% of total';
-
-$('kpi-proj-month').textContent = moneyK(projectedMonth);
-$('kpi-proj-month-sub').textContent = 'if pace continues';
-
-$('kpi-payroll-pct').textContent = junePayrollPct+'%';
 
 // Business KPIs
 const bizPrime=((bizC+bizL)/bizS*100), bizCogsP=(bizC/bizS*100), bizLaborP=(bizL/bizS*100);
