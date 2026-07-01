@@ -392,7 +392,7 @@ const mData = [
   {m:'March',    sales:125975, cogs:46501, labor:22389, admin:10718, overhead:25634, net:20733,  cogsP:36.9, laborP:17.8, primeP:54.7, netP:16.5,  note:'QB close ✓ · pre-Passover peak'},
   {m:'April',    sales:83246,  cogs:30079, labor:20439, admin:8000,  overhead:14888, net:9840,   cogsP:36.1, laborP:24.6, primeP:60.7, netP:11.82, note:'QB close ✓ · Passover disruption'},
   {m:'May',      sales:94119,  cogs:26122, labor:28157, admin:10632, overhead:23656, net:5552,   cogsP:27.8, laborP:29.9, primeP:57.7, netP:5.90,  note:'QB close ✓ · catering $3,520'},
-  {m:'June',     sales:/*JUNE_MTD_START*/116936/*JUNE_MTD_END*/, cogs:null, labor:null, admin:null, overhead:null, net:null, cogsP:null, laborP:null, primeP:null, netP:null, note:'In progress (MTD) · Jun 1-27 + Sheva Brachot'},
+  {m:'June',     sales:/*JUNE_MTD_START*/128537/*JUNE_MTD_END*/, cogs:null, labor:null, admin:8000, overhead:null, net:null, cogsP:null, laborP:null, primeP:null, netP:null, note:'Sales closed ✓ · Jun 1-30 · Costs pending (due in 2 weeks)'},
 ];
 
 const byM = {
@@ -430,6 +430,7 @@ const weeks = [
   {week:"Jun 7–13",   cl:2260,  cng:6783,  ub:2484,  sn:14471, total:25998},
   {week:"Jun 14–20",  cl:3907,  cng:2079,  sn:26347, total:32333},
   {week:"Jun 21–27",  cng:1286, sn:29639, total:30925},
+  {week:"Jun 28–Jul 4", total:11601, partial:true},
 ];
 
 // Labor hours from Connecteam Time Clock — updated weekly (each Sunday).
@@ -745,3 +746,4 @@ plT.innerHTML+=`<tr style="background:#f8fafc;font-weight:700">
 </script>
 </body>
 </html>
+<!-- Updated Wed Jul  1 03:54:20 UTC 2026 -->
