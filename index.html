@@ -615,8 +615,9 @@ const projYearEnd=Math.round(ytdSales/monthsElapsed*12);
 const onPace=ytdSales>=expectedByNow;
 $('goal-ytd').textContent=pct(ytdSales/ANNUAL_GOAL*100);
 $('goal-ytd-sub').textContent=moneyK(ytdSales)+' of '+moneyK(ANNUAL_GOAL);
-$('goal-pace').textContent=(ytdSales>=expectedByNow?'+':'')+money(Math.round(ytdSales-expectedByNow));
-$('goal-pace-sub').textContent='vs '+moneyK(expectedByNow)+' expected by now';
+const pacePct=(ytdSales/expectedByNow-1)*100;
+$('goal-pace').textContent=(pacePct>=0?'+':'')+pacePct.toFixed(1)+'%';
+$('goal-pace-sub').textContent=(ytdSales>=expectedByNow?'+':'')+money(Math.round(ytdSales-expectedByNow))+' vs '+moneyK(expectedByNow)+' expected';
 $('goal-pace-badge').textContent=onPace?'✓ Ahead of pace':'⚠ Behind pace';
 $('goal-pace-badge').className='kpi-badge '+(onPace?'badge-up':'badge-down');
 $('goal-proj').textContent=moneyK(projYearEnd);
@@ -629,6 +630,8 @@ mData.forEach(m=>{
   const above=m.sales>=monthGoal;
   const color=above?'#16a34a':'#f59e0b';
   const barW=Math.min(m.sales/gScaleMax*100,100);
+  const vsTargetPct=(m.sales/monthGoal-1)*100;      // % above/below the $97,917 target
+  const pctStr=(vsTargetPct>=0?'+':'')+vsTargetPct.toFixed(1)+'%';
   goalTrack.innerHTML+=`
     <div style="display:flex;align-items:center;gap:12px">
       <span style="width:38px;font-size:12px;font-weight:600;color:#64748b">${m.m.slice(0,3)}</span>
@@ -636,7 +639,7 @@ mData.forEach(m=>{
         <div style="position:absolute;left:${gTargetPos}%;top:0;bottom:0;width:2px;background:#0f172a;opacity:.55;z-index:2"></div>
         <div style="position:absolute;left:0;top:3px;bottom:3px;width:${barW}%;background:${color};border-radius:4px"></div>
       </div>
-      <span style="width:96px;text-align:right;font-size:12px;font-weight:700;color:${color}">${money(m.sales)} ${above?'▲':'▼'}</span>
+      <span style="width:150px;text-align:right;font-size:12px;font-weight:700;color:${color}">${money(m.sales)} · ${pctStr} ${above?'▲':'▼'}</span>
     </div>`;
 });
 
