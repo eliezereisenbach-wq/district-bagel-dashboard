@@ -540,7 +540,7 @@ $('biz-net-badge').textContent=bizN>=0?'✓ Profit':'⚠ Loss';
 $('biz-net-badge').className='kpi-badge '+(bizN>=0?'badge-up':'badge-down');
 
 // Avg daily sales — open days only (Sun–Fri), excluding Passover week (6d, $2,497) & Purim (1d)
-const OPEN_DAYS_YTD = 145;          // 152 calendar open days − 6 (Passover week) − 1 (Purim)
+const OPEN_DAYS_YTD = 148;          // 155 calendar open days (Jan–Jun full) − 6 (Passover week) − 1 (Purim)
 const PASSOVER_WEEK_SALES = 2497;   // abnormal closed week excluded from the average
 const avgDailyOpen = Math.round((ytdSales - PASSOVER_WEEK_SALES) / OPEN_DAYS_YTD);
 $('biz-daily').textContent = money(avgDailyOpen);
