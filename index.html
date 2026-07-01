@@ -189,7 +189,7 @@
   <div class="panel">
     <div class="panel-title">Sales vs Annual Goal — $1,175,000</div>
     <div class="panel-sub">Monthly target $97,917 · Green = above · Orange = below</div>
-    <div class="kpi-row c3" style="margin:6px 0 18px">
+    <div class="kpi-row c4" style="margin:6px 0 18px">
       <div class="kpi">
         <div class="kpi-label">YTD Progress</div>
         <div class="kpi-value" id="goal-ytd">—</div>
@@ -205,6 +205,12 @@
         <div class="kpi-label">Projected Year-End</div>
         <div class="kpi-value" id="goal-proj">—</div>
         <div class="kpi-sub" id="goal-proj-sub">—</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">vs 2025</div>
+        <div class="kpi-value" id="goal-yoy">—</div>
+        <div class="kpi-sub" id="goal-yoy-sub">—</div>
+        <span class="kpi-badge" id="goal-yoy-badge">—</span>
       </div>
     </div>
     <div id="goalTrack" style="display:flex;flex-direction:column;gap:10px;margin-top:6px"></div>
@@ -623,6 +629,13 @@ $('goal-pace-badge').textContent=onPace?'✓ Ahead of pace':'⚠ Behind pace';
 $('goal-pace-badge').className='kpi-badge '+(onPace?'badge-up':'badge-down');
 $('goal-proj').textContent=moneyK(projYearEnd);
 $('goal-proj-sub').textContent=projYearEnd>=ANNUAL_GOAL?'✓ '+moneyK(projYearEnd-ANNUAL_GOAL)+' over goal':moneyK(ANNUAL_GOAL-projYearEnd)+' under goal';
+// Year-over-year vs 2025 (projected 2026 vs 2025 actual)
+const LAST_YEAR_SALES=1117000;
+const yoyPct=(projYearEnd/LAST_YEAR_SALES-1)*100;
+$('goal-yoy').textContent=(yoyPct>=0?'+':'')+yoyPct.toFixed(1)+'%';
+$('goal-yoy-sub').textContent='2025: '+moneyK(LAST_YEAR_SALES)+' → 2026 proj '+moneyK(projYearEnd);
+$('goal-yoy-badge').textContent=yoyPct>=0?'✓ Growth':'⚠ Decline';
+$('goal-yoy-badge').className='kpi-badge '+(yoyPct>=0?'badge-up':'badge-down');
 // Monthly bars vs $97,917 target
 const goalTrack=$('goalTrack');
 const gScaleMax=140000;
